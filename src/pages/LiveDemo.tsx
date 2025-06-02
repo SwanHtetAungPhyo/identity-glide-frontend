@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Play, Check, Copy } from 'lucide-react';
+import { ArrowLeft, Play, Check, Copy, Terminal, Code2, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 
@@ -22,6 +22,73 @@ const LiveDemo = () => {
       description: "SDK code has been copied to clipboard",
     });
     setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const SyntaxHighlighter = ({ children, language }: { children: string; language: string }) => {
+    const highlightCode = (code: string, lang: string) => {
+      const lines = code.split('\n');
+      return lines.map((line, index) => {
+        let highlightedLine = line;
+        
+        // Comments
+        highlightedLine = highlightedLine.replace(/(\/\/.*|#.*)/g, '<span class="text-gray-500 italic">$1</span>');
+        
+        // Keywords
+        const keywords = ['import', 'export', 'const', 'let', 'var', 'function', 'async', 'await', 'try', 'catch', 'if', 'else', 'return', 'class', 'def', 'from'];
+        keywords.forEach(keyword => {
+          const regex = new RegExp(`\\b(${keyword})\\b`, 'g');
+          highlightedLine = highlightedLine.replace(regex, '<span class="text-purple-400 font-medium">$1</span>');
+        });
+        
+        // Strings
+        highlightedLine = highlightedLine.replace(/(['"`])((?:(?!\1)[^\\]|\\.)*)(\1)/g, '<span class="text-green-400">$1$2$3</span>');
+        
+        // Numbers
+        highlightedLine = highlightedLine.replace(/\b(\d+\.?\d*)\b/g, '<span class="text-orange-400">$1</span>');
+        
+        // Functions/methods
+        highlightedLine = highlightedLine.replace(/(\w+)(\()/g, '<span class="text-blue-400">$1</span>$2');
+        
+        // Properties
+        highlightedLine = highlightedLine.replace(/\.(\w+)/g, '.<span class="text-cyan-400">$1</span>');
+        
+        // Variables in template literals
+        highlightedLine = highlightedLine.replace(/\$\{([^}]+)\}/g, '<span class="text-yellow-300">${$1}</span>');
+        
+        return (
+          <div key={index} className="table-row">
+            <span className="table-cell text-gray-600 pr-4 text-right select-none w-8">
+              {index + 1}
+            </span>
+            <span 
+              className="table-cell pl-4"
+              dangerouslySetInnerHTML={{ __html: highlightedLine }}
+            />
+          </div>
+        );
+      });
+    };
+
+    return (
+      <div className="bg-gray-950 rounded-lg overflow-hidden border border-gray-800">
+        <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-800">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          </div>
+          <div className="flex items-center space-x-2 text-gray-400 text-sm">
+            <Code2 size={14} />
+            <span>{language}</span>
+          </div>
+        </div>
+        <div className="p-4 overflow-x-auto">
+          <div className="table w-full font-mono text-sm leading-relaxed">
+            {highlightCode(children, language)}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const javascriptCode = `// 🌈 KYC SDK - Pure JavaScript Implementation
@@ -343,35 +410,47 @@ curl -X POST "${baseUrl}/kyc" \\
 # - API keys expire after 30 days`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gray-950">
       {/* Header */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/')}
-            className="text-white hover:text-blue-300"
-          >
-            <ArrowLeft size={20} className="mr-2" />
-            Back to Home
-          </Button>
-          <Badge className="bg-green-100 text-green-800 border-green-200">
-            🟢 API Status: Live
-          </Badge>
+      <div className="border-b border-gray-800 bg-gray-900/50 backdrop-blur">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/')}
+              className="text-gray-300 hover:text-green-400 hover:bg-gray-800"
+            >
+              <ArrowLeft size={20} className="mr-2" />
+              Back to Home
+            </Button>
+            <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+              <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+              API Status: Live
+            </Badge>
+          </div>
         </div>
+      </div>
 
+      <div className="container mx-auto px-4 py-12">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-white mb-4">
-            🚀 Live KYC API Demo
+        <div className="text-center mb-16">
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <Terminal className="w-16 h-16 text-green-400" />
+              <Zap className="w-6 h-6 text-yellow-400 absolute -top-1 -right-1" />
+            </div>
+          </div>
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent mb-4">
+            Live KYC API Demo
           </h1>
-          <p className="text-xl text-gray-300 mb-8">
-            Interactive examples and SDK implementations for instant integration
+          <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+            Production-ready SDK examples with real syntax highlighting. 
+            Copy, paste, and start building instantly.
           </p>
           <div className="flex justify-center gap-4 mb-8">
             <Button 
               onClick={() => navigate('/kyc')} 
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-green-600 hover:bg-green-700 text-black font-medium"
             >
               <Play size={16} className="mr-2" />
               Try Interactive Demo
@@ -380,65 +459,66 @@ curl -X POST "${baseUrl}/kyc" \\
         </div>
 
         {/* API Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <Card className="bg-white/10 border-white/20 text-white">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <Card className="bg-gray-900/50 border-gray-800">
             <CardContent className="pt-6">
               <div className="text-center">
-                <div className="text-3xl mb-2">⚡</div>
-                <h3 className="font-semibold mb-2">Base URL</h3>
-                <code className="text-blue-300 text-sm bg-black/30 px-2 py-1 rounded">
+                <div className="text-3xl mb-3">⚡</div>
+                <h3 className="font-semibold mb-2 text-gray-200">Base URL</h3>
+                <code className="text-green-400 text-sm bg-gray-950 px-3 py-2 rounded border border-gray-800">
                   {baseUrl}
                 </code>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white/10 border-white/20 text-white">
+          <Card className="bg-gray-900/50 border-gray-800">
             <CardContent className="pt-6">
               <div className="text-center">
-                <div className="text-3xl mb-2">🔑</div>
-                <h3 className="font-semibold mb-2">Authentication</h3>
-                <p className="text-sm text-gray-300">JWT Bearer Tokens</p>
-                <p className="text-xs text-gray-400">30-day expiration</p>
+                <div className="text-3xl mb-3">🔑</div>
+                <h3 className="font-semibold mb-2 text-gray-200">Authentication</h3>
+                <p className="text-sm text-gray-400">JWT Bearer Tokens</p>
+                <p className="text-xs text-gray-500">30-day expiration</p>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white/10 border-white/20 text-white">
+          <Card className="bg-gray-900/50 border-gray-800">
             <CardContent className="pt-6">
               <div className="text-center">
-                <div className="text-3xl mb-2">📊</div>
-                <h3 className="font-semibold mb-2">Response Format</h3>
-                <p className="text-sm text-gray-300">JSON with similarity scores</p>
-                <p className="text-xs text-gray-400">Real-time verification</p>
+                <div className="text-3xl mb-3">📊</div>
+                <h3 className="font-semibold mb-2 text-gray-200">Response Format</h3>
+                <p className="text-sm text-gray-400">JSON with similarity scores</p>
+                <p className="text-xs text-gray-500">Real-time verification</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* SDK Examples */}
-        <Card className="bg-white/5 border-white/20 backdrop-blur">
+        <Card className="bg-gray-900/30 border-gray-800 backdrop-blur">
           <CardHeader>
-            <CardTitle className="text-white flex items-center">
-              💻 Developer SDK Examples
+            <CardTitle className="text-gray-200 flex items-center">
+              <Code2 className="mr-3 text-green-400" />
+              Developer SDK Examples
             </CardTitle>
-            <CardDescription className="text-gray-300">
-              Production-ready code samples for instant integration
+            <CardDescription className="text-gray-400">
+              Production-ready code samples with beautiful syntax highlighting
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="javascript" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-white/10">
-                <TabsTrigger value="javascript" className="text-white data-[state=active]:bg-blue-600">
+              <TabsList className="grid w-full grid-cols-4 bg-gray-800 border border-gray-700">
+                <TabsTrigger value="javascript" className="text-gray-300 data-[state=active]:bg-green-600 data-[state=active]:text-black">
                   JavaScript
                 </TabsTrigger>
-                <TabsTrigger value="react" className="text-white data-[state=active]:bg-blue-600">
+                <TabsTrigger value="react" className="text-gray-300 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
                   React Hook
                 </TabsTrigger>
-                <TabsTrigger value="python" className="text-white data-[state=active]:bg-blue-600">
+                <TabsTrigger value="python" className="text-gray-300 data-[state=active]:bg-yellow-600 data-[state=active]:text-black">
                   Python
                 </TabsTrigger>
-                <TabsTrigger value="curl" className="text-white data-[state=active]:bg-blue-600">
+                <TabsTrigger value="curl" className="text-gray-300 data-[state=active]:bg-orange-600 data-[state=active]:text-white">
                   cURL
                 </TabsTrigger>
               </TabsList>
@@ -448,15 +528,15 @@ curl -X POST "${baseUrl}/kyc" \\
                   <Button
                     size="sm"
                     variant="outline"
-                    className="absolute top-4 right-4 z-10"
+                    className="absolute top-4 right-4 z-10 bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
                     onClick={() => copyToClipboard(javascriptCode, 'javascript')}
                   >
                     {copiedCode === 'javascript' ? <Check size={16} /> : <Copy size={16} />}
                     {copiedCode === 'javascript' ? 'Copied!' : 'Copy'}
                   </Button>
-                  <pre className="bg-gray-900 text-green-400 p-6 rounded-lg overflow-x-auto text-sm leading-relaxed">
-                    <code>{javascriptCode}</code>
-                  </pre>
+                  <SyntaxHighlighter language="javascript">
+                    {javascriptCode}
+                  </SyntaxHighlighter>
                 </div>
               </TabsContent>
 
@@ -465,15 +545,15 @@ curl -X POST "${baseUrl}/kyc" \\
                   <Button
                     size="sm"
                     variant="outline"
-                    className="absolute top-4 right-4 z-10"
+                    className="absolute top-4 right-4 z-10 bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
                     onClick={() => copyToClipboard(reactCode, 'react')}
                   >
                     {copiedCode === 'react' ? <Check size={16} /> : <Copy size={16} />}
                     {copiedCode === 'react' ? 'Copied!' : 'Copy'}
                   </Button>
-                  <pre className="bg-gray-900 text-cyan-400 p-6 rounded-lg overflow-x-auto text-sm leading-relaxed">
-                    <code>{reactCode}</code>
-                  </pre>
+                  <SyntaxHighlighter language="jsx">
+                    {reactCode}
+                  </SyntaxHighlighter>
                 </div>
               </TabsContent>
 
@@ -482,15 +562,15 @@ curl -X POST "${baseUrl}/kyc" \\
                   <Button
                     size="sm"
                     variant="outline"
-                    className="absolute top-4 right-4 z-10"
+                    className="absolute top-4 right-4 z-10 bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
                     onClick={() => copyToClipboard(pythonCode, 'python')}
                   >
                     {copiedCode === 'python' ? <Check size={16} /> : <Copy size={16} />}
                     {copiedCode === 'python' ? 'Copied!' : 'Copy'}
                   </Button>
-                  <pre className="bg-gray-900 text-yellow-400 p-6 rounded-lg overflow-x-auto text-sm leading-relaxed">
-                    <code>{pythonCode}</code>
-                  </pre>
+                  <SyntaxHighlighter language="python">
+                    {pythonCode}
+                  </SyntaxHighlighter>
                 </div>
               </TabsContent>
 
@@ -499,15 +579,15 @@ curl -X POST "${baseUrl}/kyc" \\
                   <Button
                     size="sm"
                     variant="outline"
-                    className="absolute top-4 right-4 z-10"
+                    className="absolute top-4 right-4 z-10 bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
                     onClick={() => copyToClipboard(curlCode, 'curl')}
                   >
                     {copiedCode === 'curl' ? <Check size={16} /> : <Copy size={16} />}
                     {copiedCode === 'curl' ? 'Copied!' : 'Copy'}
                   </Button>
-                  <pre className="bg-gray-900 text-orange-400 p-6 rounded-lg overflow-x-auto text-sm leading-relaxed">
-                    <code>{curlCode}</code>
-                  </pre>
+                  <SyntaxHighlighter language="bash">
+                    {curlCode}
+                  </SyntaxHighlighter>
                 </div>
               </TabsContent>
             </Tabs>
@@ -515,14 +595,14 @@ curl -X POST "${baseUrl}/kyc" \\
         </Card>
 
         {/* Integration Tips */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 border-blue-400/30 text-white">
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border-blue-800/30">
             <CardHeader>
-              <CardTitle className="flex items-center">
+              <CardTitle className="flex items-center text-gray-200">
                 🛡️ Security Best Practices
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+            <CardContent className="space-y-2 text-sm text-gray-300">
               <p>• Store API keys securely (environment variables)</p>
               <p>• Implement proper error handling</p>
               <p>• Use HTTPS for all requests</p>
@@ -531,13 +611,13 @@ curl -X POST "${baseUrl}/kyc" \\
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-600/20 to-teal-600/20 border-green-400/30 text-white">
+          <Card className="bg-gradient-to-br from-green-900/20 to-teal-900/20 border-green-800/30">
             <CardHeader>
-              <CardTitle className="flex items-center">
+              <CardTitle className="flex items-center text-gray-200">
                 ⚡ Performance Tips
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+            <CardContent className="space-y-2 text-sm text-gray-300">
               <p>• Compress images before upload</p>
               <p>• Use connection pooling</p>
               <p>• Implement retry logic with exponential backoff</p>
@@ -548,16 +628,16 @@ curl -X POST "${baseUrl}/kyc" \\
         </div>
 
         {/* CTA Section */}
-        <div className="text-center mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-12">
-          <h2 className="text-4xl font-bold text-white mb-4">Ready to Integrate?</h2>
-          <p className="text-xl text-blue-100 mb-8">
+        <div className="text-center mt-16 bg-gradient-to-r from-green-900/40 to-blue-900/40 rounded-2xl p-12 border border-gray-800">
+          <h2 className="text-4xl font-bold text-gray-200 mb-4">Ready to Integrate?</h2>
+          <p className="text-xl text-gray-400 mb-8">
             Start building with our KYC API in minutes, not months
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" onClick={() => navigate('/kyc')}>
+            <Button size="lg" className="bg-green-600 hover:bg-green-700 text-black font-medium" onClick={() => navigate('/kyc')}>
               Try Interactive Demo
             </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
+            <Button size="lg" variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800">
               View Documentation
             </Button>
           </div>
