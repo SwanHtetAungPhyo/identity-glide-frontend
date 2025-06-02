@@ -1,13 +1,14 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Check, ArrowRight, Camera, Upload, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Landing = () => {
   const [activeTab, setActiveTab] = useState('starter');
+  const navigate = useNavigate();
 
   const pricingTiers = {
     starter: {
@@ -113,10 +114,10 @@ const Landing = () => {
             Built for Asia's fastest-growing companies.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3">
+            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3" onClick={() => navigate('/kyc')}>
               Start Building Free <ArrowRight size={20} className="ml-2" />
             </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 py-3">
+            <Button size="lg" variant="outline" className="text-lg px-8 py-3" onClick={() => navigate('/demo')}>
               View Live Demo
             </Button>
           </div>
